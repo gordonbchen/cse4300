@@ -85,3 +85,25 @@ CPU utilization = 1 - (IO wait percent)^procs
 * CPU util = 1 - 0.3^7
 can use swap space in HDD for RAM for more procs
 
+threads (pthread_create) vs processes (fork)
+* threads are in same process, share memory
+* thread create does not allocate more space in RAM
+    * same process, accesses same global vars
+    * each thread gets own local vars (own stack)
+* user creates thread: OS adds thread to thread table
+
+user-level threads (Java VM)
+* user-space: thread table, runtime
+* kernel-space: process table
+* problems
+    * user-space thread wants to read file, OS blocks entire process (doesn't know about threads), all other user-space threads also blocked
+    * no interrupts within process: threads must manually yield to other threads
+
+kernel threads: process table and thread table managed by kernel
+* P1 | T1 calls fread | OS makes T1 blocked, chooses T2 | T2 runs
+
+CPU quantum: default time process runs for
+* if interrupted, OS can switch between processes, chooses threads
+* thread recycling: reusing thread data structure as empty
+
+race conditions: threads clobber each other (read/write at the same time)

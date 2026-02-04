@@ -1,0 +1,60 @@
+passing information:
+* process: pipes
+* threads: shared globals
+
+race condition
+* 2 procs overwrite shared memory: use locks on resources
+
+* critical region: accessing shared resource
+* no assumptions about process speed / # CPUs
+* no processes outside of cricial region can block other processes
+* no process gets blocked forever
+
+P1 enters critical region, OS locks resource, P2 tries to access resource, OS blocks P2, P1 releases resource, OS unblocks P2
+
+disabling interrupts: process disables interrupts, uses resource, enables interrupts
+* must disable interrupts on all cores (multiple cores can try to access same memory)
+* program can crashe before disabling interrupt
+
+lock variables
+* 0: enter critical section, set lock to 1, after exiting critical section lock = 0
+* 1: block
+* problem: lock variable itself is shared, source of race condition
+
+busy waiting: loop until resource unlocked, then lock
+* deadlock
+
+peterson's solution
+* declare interested in using resource
+* loop while both interested
+
+lock, semaphore, pcond
+* pcond_wait: tells OS thread is waiting for that lock. OS wait for lock, then wakes up thread
+* signal: tells OS lock is unlocked, OS can wake up others.
+
+lock: TSL (test and set lock) instruction
+* atmoic instruction: copies lock into register, then overwrite with lock
+* locks memory bus: so other thread (on other core) can not access RAM
+* unlocks memory bus
+* compare lock value in register to 0: if 0, then that thread can continue, otherwise, locked
+
+x86: XCHG instruction
+* put 1 into register, exchange lock variable and register
+* compare register to 0: loop again or return (allowing critical section to run)
+
+TSL and Peterson busy wait
+
+round robin scheduling: just repeat in order
+priority scheduling: processes have pre-assigned priority level
+* priority inversion problem: deadlocks with busy waiting (higher priority busy waits for lock)
+
+mutex
+* TSL get mutex
+* if 0: continue
+* else: call thread_yield: let OS know blocked
+* when the lock is released again, you have to relock
+
+producer-consumer (bounded buffer) problem
+* P1 and P2 have shared buffer
+* P1 produces items in to buffer, P2 consumes from buffer
+* lost wakeup problem: both processes can go to sleep

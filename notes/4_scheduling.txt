@@ -1,0 +1,20 @@
+# Scheduling 
+* CPU-bound: long CPU burst, then short IO
+* IO-bound: short CPU burst, waiting for IO
+
+batch: slurm
+* high throughput, fast turnaround time, high CPU utilization
+
+interactive: gaming, msword
+* fast reponse time
+
+real time: plane, cruise control
+* safety critical, requires frequency guarentee
+
+
+batch
+* first-come first-served (FIFO queue)
+    * 10s job has to wait for 1hr job
+    * blocked process gets moved to end of queue
+    * non-preemptive: OS does not interrupt process to switch
+

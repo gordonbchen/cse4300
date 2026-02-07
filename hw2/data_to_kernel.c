@@ -96,8 +96,10 @@ int main(int argc, char* argv[]) {
     packet_head = 0;
     packet_tail = 0;
 
-    // Start producers.
-    pthread_t producers[N_PRODUCERS];
+    // Create producers.
+    pthread_t *producers = malloc(sizeof(pthread_t) * N_PRODUCERS);
+    if (producers == NULL) die("malloc");
+
     int *producer_ids = malloc(sizeof(int) * N_PRODUCERS);
     if (producer_ids == NULL) die("malloc");
 
@@ -106,8 +108,10 @@ int main(int argc, char* argv[]) {
         if (pthread_create(producers+i, NULL, producer, producer_ids+i) != 0) die("pthread_create");
     }
 
-    // Start consumers.
-    pthread_t consumers[N_CONSUMERS];
+    // Create consumers.
+    pthread_t *consumers = malloc(sizeof(pthread_t) * N_CONSUMERS);
+    if (consumers == NULL) die("malloc");
+
     int *consumer_ids = malloc(sizeof(int) * N_CONSUMERS);
     if (consumer_ids == NULL) die("malloc");
 
@@ -125,5 +129,8 @@ int main(int argc, char* argv[]) {
     }
 
     free(packets);
+    free(producers);
     free(producer_ids);
+    free(consumers);
+    free(consumer_ids);
 }

@@ -1,0 +1,22 @@
+User level thread 1 is going to put data in a packet
+User level thread 2 is going to put data in a packet
+No packet available or not my turn to produce, user level thread 4 going to sleep
+No packet available or not my turn to produce, user level thread 5 going to sleep
+No packet available or not my turn to produce, user level thread 3 going to sleep
+No packet available or not my turn to produce, user level thread 6 going to sleep
+user thread 1 getting served
+No packet available or not my turn to produce, user level thread 4 going to sleep
+User level thread 3 is going to put data in a packet
+No packet available or not my turn to produce, user level thread 5 going to sleep
+No packet available or not my turn to produce, user level thread 6 going to sleep
+user thread 2 getting served
+User level thread 4 is going to put data in a packet
+No packet available or not my turn to produce, user level thread 5 going to sleep
+No packet available or not my turn to produce, user level thread 6 going to sleep
+user thread 3 getting served
+User level thread 5 is going to put data in a packet
+No packet available or not my turn to produce, user level thread 6 going to sleep
+user thread 4 getting served
+User level thread 6 is going to put data in a packet
+user thread 5 getting served
+user thread 6 getting served

@@ -1,0 +1,5 @@
+producer 0: 257 sleeps, 335 contribs
+producer 1: 252 sleeps, 325 contribs
+producer 2: 256 sleeps, 340 contribs
+consumer 0: 1 sleeps, 498 contribs
+consumer 1: 1 sleeps, 502 contribs

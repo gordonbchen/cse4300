@@ -61,7 +61,7 @@ void* producer(void* arg) {
         ++(thread_info->n_contribs);
 
         // Wake up consumers.
-        pthread_cond_broadcast(&not_empty);
+        pthread_cond_signal(&not_empty);
         pthread_mutex_unlock(&queue_mutex);
     }
 }
@@ -94,7 +94,7 @@ void* consumer(void* arg) {
         ++(thread_info->n_contribs);
 
         // Wake up producers.
-        pthread_cond_broadcast(&not_full);
+        pthread_cond_signal(&not_full);
         pthread_mutex_unlock(&queue_mutex);
     }
 }

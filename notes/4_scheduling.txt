@@ -12,9 +12,65 @@ real time: plane, cruise control
 * safety critical, requires frequency guarentee
 
 
-batch
-* first-come first-served (FIFO queue)
-    * 10s job has to wait for 1hr job
-    * blocked process gets moved to end of queue
-    * non-preemptive: OS does not interrupt process to switch
+# batch
+first-come first-served (FIFO queue)
+* 10s job has to wait for 1hr job
+* blocked process gets moved to end of queue
+* non-preemptive: OS does not interrupt process to switch
+
+shortest first
+* optimal average turnaround time (only if jobs arrive at the same time)
+* non-preemptive
+
+shortest remaining time next
+* preemptive
+* if new job requires less time, suspend current one, then execute new job
+* requires knowing job time length
+* long jobs can get starved
+
+
+# interactive (all preemptive)
+round-robin: repeat in order abc, abc...
+
+priority scheduling
+* procs have priorities
+* if static priority: low priority processes starve
+* reduce priority level after each clock interrupt
+* high priority to IO bound: priority = 1 / (frac of quantum)
+    * IO bound don't wait in queue as long
+    * less quantum used = higher priority
+* round robin in priority classes
+
+multiple queues
+* high cost for swapping (RAM to Hard Disk, in the old days when not enough disk)
+* class n gets 2^n quantum, increase n each time the process uses up all the quantum and hasn't terminated yet
+* 100 quantum process swapped 100 times vs 1 + 2 + 4 + 8 + 16 + 32 + 64, 7 swaps
+
+shortest process next (aka aging)
+* run job with shorted estimated running time
+* estimate time job takes with lerp: a T_0 + (1-a) T_1, a = 1/2
+
+40, 20, 40, 15
+30, 40, 15
+35, 15
+25
+
+guarenteed scheduling
+* n users, each user gets 1/n CPU share
+* track proc owners and proc time
+
+lottery scheduling
+* probabilistically chooses next process
+* prob of process running proportional to # lottery tickets
+
+
+# Real-time scheduling
+* deadlines > fairness
+
+cowboy scheduling problem
+* horse must get fed for 10 minutes every 20 minutes
+* cow must get fed for 25 minutes every 50 minutes
+
+earliest deadline first
+* needs sum_i(cpu_time / period_time) < 1
 

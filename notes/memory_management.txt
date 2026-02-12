@@ -1,0 +1,95 @@
+scheduling
+* process table: save proogram counter
+
+need to load processes (including OS) into RAM
+
+relocation problem
+* compilers assume programs are loaded starting at 0
+* JMP 24: sets PC = 24
+* assumption wrong when loaded into RAM, doesn't start at 0
+* cannot execute program as-is
+* all jump lines must add the start addr
+
+process table: start addr, end addr, pc
+
+static relocation:
+* loader function goes through program, adds program start addr to all addresses
+* slow, must get recomputed every time
+
+base and limit registers
+* load start addr and len into base and limit register
+* gives each proc a separate addr space
+* hardware adds addr to base register, checks that under limit register
+
+# how to fit procs in memory?
+swapping: moving procs back and forth from HDD
+* memory holes: memory compaction, copying procs to make contiguous
+* leave space for procs to grow (to allocate more dynamic memory)
+
+not enough space: move to bigger hole, suspend until space opens, kill proc
+
+
+garbage collector (Python): frees up memory not in use (local scope)
+* C: no GC, programmer manually manages memory
+
+RAM is split into 4kb chunks
+* each chunk is represented by bit in bitmap
+* malloc: scan for chunk of large enough size
+* process table: proc, start, size
+
+linked list: process start length | hole start length
+* split holes into used and unused in 
+* free: collapse consecutive holes
+
+memory allocation algoirthms
+* first fit: scan for hole large enough to fit proc, best
+* next fit: put proc in last index in list
+* best fit: find hole just big enough, can end up with many tiny holes
+* worst fit: find largest hole
+* quick fit: multiple lists, <4kb linked list, <8kb linked list, have to move holes around when allocating
+
+
+overlays
+* developed for scarce RAM
+* split programs into small pieces (overlays)
+* overlay manager: load and swap overlays
+* programmer has to define overlays
+
+virtual memory
+* program on disk, load pages to RAM
+* clean/dirty vridvpages, must write-back pages to RAM
+* page size: 4kb
+
+page table
+* virtual page # -> page size
+* virtual address (within page) -> physical address (could be in other page)
+* pagefault: OS has to find page in disk, moves page to ram (throws out a page)
+    * launches page fault handling routine, OS runs, suspends P1, runs P2, OS schedules P1 again, P1 tries to get page again
+
+32k ram, byte addressable (32k byte entries)
+* need 15 bits
+* each page frame is 4k bytes (12 bits)
+* so 3 bits to address the page frame (32k / 4k = 8)
+* 12 bits to address byte in page (offset in page)
+
+12 byte ram, 4 byte pages
+* 4 bit address: 2 page number bits, 2 offset bits
+0111 -> page 01 = 1, offset 11 = 3 -> 3rd byte inside page 1
+
+32 byte program
+page table needs 8 entries (4 byte pages)
+* virtual page mapped to physical page
+
+virtual page number -> physical page | virtual page offset = physical page offset
+
+virtual addr 000|11, page table: virtual 0 -> physical 1
+physical addr 01|11
+
+access memory:
+* try to get memory at virtual address
+* calculate page number, look in page table
+* if page not in page table: pagefault, writeback if existing page is dirty, get page
+* split virtual address = virtual page | offset, translate into physical page | offset using page table virtual page -> physical page
+
+paging b/c can have arbitrarily large program (virtual addr space) map onto smaller physical memory
+* small RAM, load program form disk

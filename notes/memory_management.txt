@@ -93,3 +93,40 @@ access memory:
 
 paging b/c can have arbitrarily large program (virtual addr space) map onto smaller physical memory
 * small RAM, load program form disk
+
+
+MMU (Memory Management Unit) b/t CPU and memory, converts virtual addr -> physical addr
+
+page table: virtual page idx -> physical page frame
+* virtual addr = page idx | offset
+* MMU checks page_table[page_idx] present/absent bit: if absent, then page fault, go fetch page frame from HDD
+* physical page idx = page_table[page_idx]
+* physical addr = physical page idx | offset
+
+
+32-bit virtual addr. 4kb page size. 512mb ram.
+* 4kb = 2^12, 12-bit offset
+* 32 - 12 = 20-bit page table idx. 2^20 virtual pages.
+
+virtual addr: 13025 = page table idx 0000 0000 0000 0000 0011 | offset 0010 1110 0001
+
+page table entry
+* present/absent bit, physical page frame idx
+* referenced bit: 0 init, page accessed, R-bit is cleared periodically for freshness
+* modified bit: 0 init, page written to, must write back to HDD when replacing page
+* protection bit: RWX permissions
+
+
+page table will take up a lot of space in the ram
+
+TLB: translation lookaside buffer
+* cache of page table in MMU
+* small number of virtual page -> page frame mappings
+* valid bit (if empty is not empty)
+* TLB miss: virtual page not in TLB, look in RAM page table
+    * soft miss: RAM page table says page is in RAM
+    * hard miss: page not in RAM, go to HDD
+* context switch: flush TLB, b/c each proc has its own virtual address space (different page table)
+
+each process has an entire copy of virtual address space? huge?
+* in page table, only keep track of entries in use

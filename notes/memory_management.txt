@@ -176,3 +176,47 @@ page replacement algorithms (page fault: have to throw out a page to make room)
     * sort pages FIFO
     * R (referenced) bit set: clear R bit, put to end
     * M (modified) bit set: ?
+    * clock replacement algorithm: circular buffer for 2nd chance alg
+* NRU: Not Recently Used
+    * R-bit cleared periodically, M-bit never cleared
+    * first replace (R,M): (0,0), (0,1), (1,0), (1,1)
+    * setting M and R: hardware vs OS sets/clears
+* LRU: Least Recently Used
+    * hardware counter auto incs after reference
+    * after mem ref: update page table counter variable
+    * replace page with lowest counter (earliest)
+* NFU: Not frequently used
+    * software counter for each page: add R-bit to left
+    * replace page with lowest counter value
+    * but doesn't forget anything
+* aging algorithm: NFU + shift counter right every clock tick
+    * R-bit goes into MSB, highest value, aging
+    * 8-bit limits horizon
+    * within a tick, cannot know which was accessed earliest
+
+
+working set page replacment
+* lots of page faults in beginning (cold start), then less and less page faults
+* thrashing: many page faults
+* demand paging: fetch page on fault
+* prepaging: before proc, load all pages in working set (less page faults)
+* what pages are in the working set?
+
+working set page table
+* R == 1: time of lst use = current virtual (not wall b/c other procs run) time
+* R == 0:
+    * age > t: remove page (not in working set)
+    * age < t: still in working set, throw out the oldest page (smallest virtual time)
+* but then you need to scan the entie page
+
+
+working set clock page replacement algorithm
+* old and M == 0: claim
+* old and M == 1: schedule write and avoid context switch
+* if write scheduled: keep scanning (write will be scheduled), there will be clean
+    else: all pages in working set, claim any
+
+
+local vs global allocation policy
+* local: only pages in same proc get replaced
+* global: pages in any proc can get replaced

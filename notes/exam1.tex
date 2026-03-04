@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\parindent=0pt
+
+\title{CSE 4300: Exam 1}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\section{P1}
+32-bit addr space, 8kb page size, 32-bit entry, copy 1 word = 100ns. each proc runs for 100ms.
+
+Find \% of CPU time to load page table.\\
+
+13-bit offset, so 19-bit page table idx, $2^{19}$ page table entries.
+
+$2^{19} * 1$ words = $2^{19}$ words, so $100ns * 2^{19} = 10^-7 * 10^6 / 2 = 10^-1 / 2 = 50 ms$\\
+
+So 50\% CPU time.
+
+
+\section{P2}
+64kb virtual address space. 16kb physical address space. 4kb page size.\\
+
+64kb VA space, so 16 bit virtual address. 16kb RAM, so 14 bit virtual address.\\
+
+4kb page size, so 12 bit offset, 4 bit page table idx.\\
+
+4 bit virtual page idx $\to$ 2 bit physical page idx.
+
+
+\section{P3}
+64kb program size. 2kb page size. Time to load program HDD $\to$ RAM?
+
+Magnetic HDD: 5ms seek time (get to correct track), 5ms rotation time (get right bit on track)
+
+on avg have to wait half rotation to read/write.
+
+1mb track.\\
+
+5ms to read 1 mb. 5ms * 64/1024 to read 64kb.
+
+then 5ms seek + 5/2 ms rotate + 5ms * 64/1024.
+
+
+\section{P4}
+amount of memory proportional to time between page faults
+
+1micros for instruction w/out page fault, 2001micros for instruction w/ page fault (2ms for page fault)
+
+60s to run program, 15000 page faults.
+
+15000 * 2ms = 30 000 ms = 30s time on page faults, so 30s instructions.
+
+if double memory, how much time?
+
+half time on page fault, so 15s page faults, total 45 sec.
+
+
+\section{P5}
+Shortest process next: predict execution time.
+
+Times; 20, 30, 40.
+
+$a T_0 + (1-a) T_1, a = 1/2$
+
+20, (20 + 30) / 2 = 25, (25 + 40) / 2 = 32.5
+\end{document}

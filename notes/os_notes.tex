@@ -1,0 +1,239 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{CSE 4300: Operating Systems Notes}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\section{Computers}
+
+\subsection{Boot}
+\begin{enumerate}
+    \item Power on.
+    \item CPU execute BIOS (firmware on Motherboard).
+    \item BIOS loads bootloader into RAM, starts executing bootloader.
+    \item Bootloader loads OS into RAM and starts executing OS.
+\end{enumerate}
+
+\subsection{Threads vs Processes}
+Process: resource container (own virtual address space), has multiple threads.
+
+Thread: unit of execution, has PC, registers, stack.
+
+Core = CPU. $n$-core CPU can execute $n$ threads in parallel.
+
+Context switching simulates more cores: suspends running proc on interrupt, OS schedules next proc.\\
+
+Syscall
+\begin{itemize}
+    \item User program wants OS service.
+    \item Switch from user to kernel mode.
+    \item OS runs, gives back control after syscall.
+\end{itemize}
+
+
+\section{Processes}
+Process table
+\begin{itemize}
+    \item PID: process ID
+    \item State: running, blocked, ready
+    \item Dumped state: PC, registers
+    \item Memory: files, memory addr
+\end{itemize}
+
+Process memory
+\begin{itemize}
+    \item Stack: function call (stack frame), grows down
+    \item Heap: dynamically allocated, malloc, grows up
+    \item Data: global and static vars
+    \item Code
+\end{itemize}
+
+Context switch
+\begin{enumerate}
+    \item Timer interrupt / syscall
+    \item Hardware pushes current PC onto stack, jumps to addr in interrupt vector table
+    \item Asm dumps PC and registers into Process Table and creates new stack for interrupt
+    \item Interrupt runs
+    \item Scheduler runs next process
+\end{enumerate}
+
+$\text{CPU util} = 1 - (\text{IO wait \%})^{\text{\# procs}}$
+
+
+\section{Threads}
+threads vs processes
+\begin{itemize}
+    \item pthread\_create vs fork
+    \item threads in the same process share memory, every process has different virtual address space
+\end{itemize}
+
+User-level threads (JVM)
+\begin{itemize}
+    \item process table in kernel space
+    \item each process is a runtime with a thread table and threads in user-space
+    \item problem: user-space thread wants to read file, OS blocks the entire process even if
+        other threads can run.
+\end{itemize}
+
+Kernel threads: process and thread tables manages by kernel
+
+CPU quantum: default time process runs for, can be interrupted
+
+
+\section{Race Conditions}
+Peterson's Solution and XCHG: busy waiting, always tries to relock\\
+Prone to priority inversion problem: L never scheduled to unlock b/c H is busy waiting
+
+\begin{verbatim}
+mutex_lock:
+    TSL register, mutex  // copy mutex to register, set mutex to 1. atomic, locks mem bus.
+    CMP register, #0     // compare register to 0 (did we get the mutex)
+    JMP ok               // if mutex 0, then we have it, return to user code
+    CALL thread_yield    // mutex is 1, we did not get the mutex, tell OS we are waiting
+    JMP mutex_lock       // we got woken up, try to relock the mutex
+ok:
+    RET
+
+mutex_unlock:
+    MOVE mutex, #0       // set the mutex to 0
+    RET
+\end{verbatim}
+
+Exponential backoff when multiple threads try to access the same resource.
+
+Reader / writer problem
+\begin{itemize}
+    \item Writer need exclusive access to write to database, just tries to lock.
+    \item First reader locks db, last reader unlocks db, track \# readers
+\end{itemize}
+
+Other primitives: condition vars (wait until condition and signal condition) and barriers (synchronize threads)
+
+
+\section{Scheduling}
+Batch (slurm)
+\begin{itemize}
+    \item First come first serve: FIFO queue, blocked proc gets moved to the end of the queue
+    \item Shortest first: optimal turnaround time if all jobs arrive at the same time
+    \item Shortest remaining time next: pre-emptive shortest first
+\end{itemize}
+
+Interactive (MS Word)
+\begin{itemize}
+    \item Round-robin
+    \item Priority: each proc assigned priority, reduce priority to not starve low priority procs\\
+        Higher priority to IO bound: priority = 1 / frac of quantum used\\
+        Round-robin in priority classes
+    \item Multiple queues: exponetially increasing quantum allocation until proc finishes (less swaps)
+    \item Shortest process next: aging $T_n = \alpha T_{n-1} + (1-\alpha) T_{n}$
+    \item Guarenteed scheduling: each user gets $1/n$ CPU share, track proc time
+    \item Lottery scheduling: randomized, users buy lottery tickets to run procs
+\end{itemize}
+
+Real-time\\
+Earliest deadline first: $\sum \dfrac{\text{cpu time}}{\text{period time}} < 1$
+
+\section{Memory Management}
+\subsection{Relocation problem}
+Compilers assume programs are loaded at mem addr 0, but they can be loaded anywhere in RAM.
+
+Static relocation: add program start addr to all addresses (slow, must be recomputed each load)
+
+Base and limit registers: hardware adds base register to addr, checks under limit register
+
+\subsection{Swapping}
+Move procs back and forth from HDD.
+
+Memory holes: compact into contiguous, leave space for procs to dynamically allocate
+
+Bitmap: each RAM chunk is bit in bitmap
+
+Linked list: proc / hole start, length, pointer to next
+
+First fit is best.
+
+\subsection{Virtual Memory}
+MMU (Memory Management Unit): translates virtual mem addr to physical meme addr\\
+
+Page table
+\begin{itemize}
+    \item virtual memory addr = page table idx + offset
+    \item \# bits in offset determined by page size
+    \item physical memory addr = page\_table[page\_table\_idx] + offset
+    \item page fault: present bit = 0 in page table, page not loaded in RAM, must fetch from HDD.
+    \item dirty (modified) bit: must write-back to RAM if removed from page table
+    \item referenced bit: set if recently accessed, periodically cleared
+    \item protections: RWX permissions
+\end{itemize}
+
+Memory access
+\begin{itemize}
+    \item virtual addr = page table idx + offset
+    \item MMU checks page\_table[page\_idx] present bit
+    \item if present bit = 0, page fault, load page from HDD into RAM, writing back if existing page dirty
+    \item physical addr = physical page + offset
+\end{itemize}
+
+TLB: Translation Lookaside Buffer
+\begin{itemize}
+    \item cache of page table in MMU (entire page table cannot fit)
+    \item TLB miss: page not in TLB, go look in RAM page table\\
+        Soft miss: page loaded, found in RAM table\\
+        Hard miss: page not loaded, not in RAM table, go fetch from HDD
+    \item Context switch: flush TLB b/c each proc has own virtual address space
+\end{itemize}
+
+Multilevel page tables
+\begin{itemize}
+    \item virtual addr = level 1 page idx + level 2 page idx + offset
+    \item only create level 2 page tables you need
+\end{itemize}
+
+Inverted page tables: hash virtual page $\to$ linked list of (virtual page, process id, physical page)
+
+\subsubsection{Page replacement algorithms}
+FIFO: throw out oldest page
+
+Second chance: FIFO but if referenced bit set, put to end of queue\\
+
+
+Clock page replacement algorithm: 2nd chance w/ circular buffer, go around until no R-bit
+
+NRU (Not Recently Used): discard order (R, M) = (0, 0), (0, 1), (1, 0), (1, 1)\\
+
+
+LRU (Least Recently Used): increment counter on reference, take lowest counter
+
+NFU (Not Frequently Used): add R-bit to per-page counter, replace page with lowest counter, doesn't forget (bad)
+
+Aging alg: add R-bit to left of per-page counter, replace lowest, 8-bit memory, can't know in a tick who was accessed first\\
+
+
+Working set
+\begin{itemize}
+    \item in page table: track time of last use for page and referenced bit
+    \item if referenced: set time of last use to current time
+    \item else: throw away page with smallest time
+\end{itemize}
+
+Working set clock
+\begin{itemize}
+    \item old page and unmodified: claim
+    \item old page and modified: schedule write
+    \item after going all the way around:\\
+        if write scheduled: keep scanning, will be clean page to claim\\
+        else: all pages in working set, claim any
+\end{itemize}
+
+
+\section{Exam 1 Review Problems}
+
+\end{document}

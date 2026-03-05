@@ -235,5 +235,46 @@ Working set clock
 
 
 \section{Exam 1 Review Problems}
+\begin{enumerate}
+    \item 4kb page size, 64-entry TLB, int array.
+        For what values of M (array step), N (array size), will you get a TLB miss for every iteration?
 
+        To get a miss, we need to get the next TLB entry, so 4kb page size / 4 byte array elem = 1024,
+        so steps of M = 1024 get us TLB misses every iteration.
+
+        64-entry TLB, so we need 1024 * 64 array elements to get a TLB misses for the entire array.
+
+    \item TLB: 1024 entries, access time is 1 clock cycle (1ns).
+        Page table entry: access time is 100 clock cycle.
+        Avg page replacement (page HDD to RAM): 6 ms.
+        TLB hit rate is 99\%.
+        0.01\% page fault (requires page replacement).
+        What is the effective addr translation time?
+
+        effective addr translation time = (tlb hit rate * tlb time) + tlb miss rate *
+        (soft miss rate * soft miss time + hard miss rate * hard miss time) =
+        0.99(1ns) + 0.01(0.99(100ns) + 0.01(6ms))
+
+    \item 32-bit addr space, 8kb page size, 32-bit entry, copy 1 word = 100ns. each proc runs for 100ms.
+        Find \% of CPU time to load page table.
+
+        32-bit VA. 8kb page size, so 13-bit offset. 19-bit page table idx, so $2^{19}$ page table entries.
+        Each page table entry is 1 word, so we have to load $2^{19}$ words. \% is then $2^{19}$ * 100ns
+        / 100ms = $2^{19}$ * $10^{-6}$ = 0.524.
+
+    \item 64kb virtual address space. 16kb physical address space. 4kb page size.
+
+        16-bit VA. 12-bit offset, so 4 page table idx bits. 14 physical address bits, so 2 physical page idx
+        bits. Page table maps 4 bit virtual page idx to 2 bit physical page idx.
+
+    \item 64kb program size. 2kb page size. Time to load program HDD $\to$ RAM?
+        Magnetic HDD: 5ms seek time (get to correct track), 5ms rotation time (get right bit on track)
+        on avg have to wait half rotation to read/write.
+        1mb track.
+
+        Program fits onto 1 track. Need to seek track, so +5ms.
+        Then +5/2 ms to rotate to program start.
+        Then 5ms * 64kb / 1mb time to read the program.
+
+\end{enumerate}
 \end{document}

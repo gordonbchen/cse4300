@@ -1,0 +1,14 @@
+services:
+  os161:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cse4300-os161:latest
+    container_name: os161
+    tty: true
+    stdin_open: true
+    user: os161user
+    working_dir: /home/os161user/os161
+    volumes:
+      - ./os161:/home/os161user/os161
+    command: ["/bin/bash"]

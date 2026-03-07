@@ -45,13 +45,13 @@ ENV PATH=${SYS161_HOME}/bin:${TOOLS_PREFIX}/bin:${PATH}
 
 # ---- Copy archives ----
 COPY --chown=${USER}:${USER} \
-    os161-binutils.tar.gz \
-    os161-gcc.tar.gz \
-    os161-gdb.tar.gz \
-    os161-bmake.tar.gz \
-    os161-mk.tar.gz \
-    os161.tar.gz \
-    sys161.tar.gz \
+    dev_env/os161-binutils.tar.gz \
+    dev_env/os161-gcc.tar.gz \
+    dev_env/os161-gdb.tar.gz \
+    dev_env/os161-bmake.tar.gz \
+    dev_env/os161-mk.tar.gz \
+    dev_env/os161.tar.gz \
+    dev_env/sys161.tar.gz \
     ${HOME}/src/
 
 # ---- Binutils ----
@@ -236,5 +236,5 @@ COPY --from=builder --chown=${USER}:${USER} \
 
 # EXPOSE 8080
 
-WORKDIR ${HOME}/os161
+WORKDIR ${HOME}/work/os161
 CMD ["/bin/bash"]

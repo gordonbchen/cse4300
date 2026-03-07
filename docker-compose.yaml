@@ -8,7 +8,7 @@ services:
     tty: true
     stdin_open: true
     user: os161user
-    working_dir: /home/os161user/os161
+    working_dir: /home/os161user/work/os161
     volumes:
-      - ./os161:/home/os161user/os161
+      - ./:/home/os161user/work
     command: ["/bin/bash"]

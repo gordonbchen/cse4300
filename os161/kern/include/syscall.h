@@ -9,5 +9,8 @@ int sys_reboot(int code);
 
 void sys__exit(int exitCode);
 
+int printint(int c);
+
+int reversestring(const char *str, int len);
 
 #endif /* _SYSCALL_H_ */

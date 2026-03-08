@@ -3,18 +3,18 @@
 #include <thread.h>
 #include <lib.h>
 
-void _exit(int exitCode) {
+void sys__exit(int exitCode) {
     kprintf("_exit exitCode: %d\n", exitCode);
     thread_exit(exitCode);
     panic("_exit failed to kill thread\n");
 }
 
-int printint(int c) {
+int sys_printint(int c) {
     kprintf("%d\n", c);
     return (c % 5 != 0);
 }
 
-int reversestring(const char *str, int len) {
+int sys_reversestring(const char *str, int len) {
     int og_len = len;
     --len;
     while (len >= 0) {

@@ -73,15 +73,15 @@ mips_syscall(struct trapframe *tf)
 			break;
 
 		case SYS__exit:
-			_exit(tf->tf_a0);
+			sys__exit(tf->tf_a0);
 			break;
 
 		case SYS_printint:
-			retval = printint(tf->tf_a0);
+			retval = sys_printint(tf->tf_a0);
 			break;
 
 		case SYS_reversestring:
-			retval = reversestring(tf->tf_a0, tf->tf_a1);
+			retval = sys_reversestring(tf->tf_a0, tf->tf_a1);
 			break;
  
 	    default:

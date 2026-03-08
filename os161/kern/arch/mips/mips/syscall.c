@@ -50,7 +50,7 @@ mips_syscall(struct trapframe *tf)
 {
 	int callno;
 	int32_t retval;
-	int err;
+	int err = 0;
 
 	assert(curspl==0);
 
@@ -77,11 +77,11 @@ mips_syscall(struct trapframe *tf)
 			break;
 
 		case SYS_printint:
-			printint(tf->tf_a0);
+			retval = printint(tf->tf_a0);
 			break;
 
 		case SYS_reversestring:
-			reversestring(tf->tf_a0, tf->tf_a1);
+			retval = reversestring(tf->tf_a0, tf->tf_a1);
 			break;
  
 	    default:

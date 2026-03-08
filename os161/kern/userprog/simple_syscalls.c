@@ -15,11 +15,12 @@ int printint(int c) {
 }
 
 int reversestring(const char *str, int len) {
+    int og_len = len;
     --len;
     while (len >= 0) {
         kprintf("%c", *(str+len));
         --len;
     }
     kprintf("\n");
-    return (len % 2 == 0);
+    return (og_len % 2 == 0);
 }

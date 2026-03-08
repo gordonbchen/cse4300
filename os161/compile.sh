@@ -1,3 +1,5 @@
+set -euo pipefail
+
 # ./configure --ostree=$HOME/work/root --toolprefix=cse4300-
 
 cd kern/conf

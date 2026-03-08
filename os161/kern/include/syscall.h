@@ -7,7 +7,7 @@
 
 int sys_reboot(int code);
 
-void sys__exit(int exitCode);
+void _exit(int exitCode);
 
 int printint(int c);
 

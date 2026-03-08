@@ -73,7 +73,7 @@ mips_syscall(struct trapframe *tf)
 			break;
 
 		case SYS__exit:
-			sys__exit(tf->tf_a0);
+			_exit(tf->tf_a0);
 			break;
 
 		case SYS_printint:

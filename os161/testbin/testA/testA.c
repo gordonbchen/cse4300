@@ -2,10 +2,10 @@
 
 int main() {
     int ret = printint(5);
-    // printf("printint ret: %d\n", ret);
+    printint(ret);
 
     ret = reversestring("hello", 5);
-    // printf("reversestring ret: %d\n", ret);
+    printint(ret);
 
-    exit(0);
+    _exit(0);
 }

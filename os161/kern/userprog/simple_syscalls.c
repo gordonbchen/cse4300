@@ -3,10 +3,10 @@
 #include <thread.h>
 #include <lib.h>
 
-void sys__exit(int exitCode) {
-    kprintf("sys__exit exitCode: %d\n", exitCode);
+void _exit(int exitCode) {
+    kprintf("_exit exitCode: %d\n", exitCode);
     thread_exit(exitCode);
-    panic("sys__exit failed to kill thread]n");
+    panic("_exit failed to kill thread\n");
 }
 
 int printint(int c) {

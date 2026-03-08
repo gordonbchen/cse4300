@@ -462,8 +462,9 @@ mi_switch(threadstate_t nextstate)
  * gets called from exorcise().
  */
 void
-thread_exit(void)
+thread_exit(int exitCode)
 {
+	kprintf("thread_exit exitCode: %d\n", exitCode);
 	if (curthread->t_stack != NULL) {
 		/*
 		 * Check the magic number we put on the bottom end of
@@ -626,5 +627,5 @@ mi_threadstart(void *data1, unsigned long data2,
 	func(data1, data2);
 
 	/* Done. */
-	thread_exit();
+	thread_exit(0);
 }

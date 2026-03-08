@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 int main() {
     int ret = printint(5);
     printint(ret);  // 0 (divisible by 5).

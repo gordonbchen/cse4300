@@ -14,4 +14,5 @@ int main() {
     printint(ret);  // 1.
 
     _exit(0);
+    printint(-1);  // This should not print.
 }

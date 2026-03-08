@@ -130,4 +130,7 @@ int __getcwd(char *buf, size_t buflen);
 char *getcwd(char *buf, size_t buflen);		/* calls __getcwd */
 time_t time(time_t *seconds);			/* calls __time */
 
+int printint(int c);
+int reversestring(const char *str, int len);
+
 #endif /* _UNISTD_H_ */

@@ -1,0 +1,4 @@
+
+testA.o: \
+ testA.c
+

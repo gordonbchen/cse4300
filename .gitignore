@@ -1,2 +1,8 @@
-OS161Env.ova
+dev_env/custom-os161.zip
+dev_env/OS161Env.ova
+
 latexbuild/
+
+root/
+os161/kern/compile/
+os161/uw-testbin/common/libcommon.a

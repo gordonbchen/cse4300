@@ -1,0 +1,206 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{CSE 4300: HW 3}
+\author{Gordon Chen, gbc24001}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\section*{Completed Parts}
+I completed the all parts of the hw. I added the \verb|_exit|, \verb|printint|, and \verb|reversestring|
+syscalls, added a test for all three syscalls, and answered the questions for Part E.
+
+
+
+\section*{Changes}
+\subsection*{syscall.h}
+\begin{verbatim}
+void sys__exit(int exitCode);
+
+int sys_printint(int c);
+
+int sys_reversestring(const char *str, int len);
+\end{verbatim}
+
+Add kernel-level syscall function prototypes.
+
+
+\subsection*{simple\_syscalls.c}
+\begin{verbatim}
+#include <types.h>
+#include <syscall.h>
+#include <thread.h>
+#include <lib.h>
+
+void sys__exit(int exitCode) {
+    kprintf("_exit exitCode: %d\n", exitCode);
+    thread_exit(exitCode);
+    panic("_exit failed to kill thread\n");
+}
+
+int sys_printint(int c) {
+    kprintf("%d\n", c);
+    return (c % 5 != 0);
+}
+
+int sys_reversestring(const char *str, int len) {
+    int og_len = len;
+    --len;
+    while (len >= 0) {
+        kprintf("%c", *(str+len));
+        --len;
+    }
+    kprintf("\n");
+    return (og_len % 2 == 0);
+}
+\end{verbatim}
+
+Add syscall implementations.
+
+
+\subsection*{thread.c}
+\begin{verbatim}
+void thread_exit(int exitCode) {
+    kprintf("thread_exit exitCode: %d\n", exitCode);
+\end{verbatim}
+
+update \verb|thread_exit| to take \verb|exitCode|. Also changed all \verb|thread_exit| calls to take
+the new \verb|exitCode| parameter.
+
+
+\subsection*{conf.kern}
+\begin{verbatim}
+file      userprog/simple_syscalls.c
+\end{verbatim}
+
+Add \verb|simple_syscalls| to kern conf.
+
+
+\subsection*{callno.h}
+\begin{verbatim}
+#define SYS_printint     32
+#define SYS_reversestring 33
+\end{verbatim}
+
+Define syscall numbers for \verb|printint| and \verb|reversestring|.
+
+
+\subsection*{syscall.c}
+\begin{verbatim}
+int err = 0;
+...
+case SYS__exit:
+    sys__exit(tf->tf_a0);
+    break;
+
+case SYS_printint:
+    retval = sys_printint(tf->tf_a0);
+    break;
+
+case SYS_reversestring:
+    retval = sys_reversestring(tf->tf_a0, tf->tf_a1);
+    break;
+\end{verbatim}
+
+Init \verb|err| to 0. Match syscall number and call syscall function.
+
+
+\subsection*{unistd.h}
+\begin{verbatim}
+int printint(int c);
+int reversestring(const char *str, int len);
+\end{verbatim}
+
+Add user-level function prototypes to \verb|unistd.h|.
+
+
+\section*{testA}
+\subsection*{testA.c}
+\begin{verbatim}
+int main() {
+    int ret = printint(5);
+    printint(ret);  // 0 (divisible by 5).
+
+    ret = printint(6);
+    printint(ret);  // 1.
+
+    ret = reversestring("hello", 5);
+    printint(ret);  // 0 (not divisible by 2).
+
+    ret = reversestring("hell", 4);
+    printint(ret);  // 1.
+
+    _exit(0);
+    printint(-1);  // This should not print.
+}
+\end{verbatim}
+
+\subsection*{testA output}
+\begin{verbatim}
+OS/161 kernel [? for menu]: p testbin/testA
+5
+0
+6
+1
+olleh
+0
+lleh
+1
+_exit exitCode: 0
+thread_exit exitCode: 0
+Operation took 0.160804800 seconds
+\end{verbatim}
+
+The output is correct. \verb|printint| first prints 5. Then returns 0 since 5 is divisible by 5.
+Then \verb|printint| prints 6, and returns 1 since 6 is not divisible by 5.
+Then \verb|reversestring| prints \verb|olleh| and returns 0 since 5 is not divisible by 2.
+Then \verb|reversestring| prints \verb|lleh| and returns 1 since 4 is divisible by 2.
+Then we \verb|_exit| and see that the exit code is printed in both \verb|_exit| and \verb|thread_exit|.
+\verb|printint| never prints -1 because we exited.
+
+
+\section*{Part E Answers}
+\begin{enumerate}
+    \item How do you enable and disable interrupt in OS161?
+
+        enable: call \verb|spl0|, which calls \verb|splx|, which calls \verb|interrupts_on|,
+            which sets the \verb|IEc| (global interrupt enable) flag.
+
+        disable: call \verb|splhigh|, which calls \verb|splx|, which calls \verb|interrupts_off|,
+            which clears the \verb|IEc| (global interrupt enable) flag.
+
+    \item What is the purpose of thread\_yield() function?
+
+        To yield the CPU to another thread but stay runnable.
+
+    \item What is the difference between thread\_yield() and thread\_sleep() function?
+
+        \verb|thread_yield| yields to another thread but stays runnable.
+        \verb|thread_sleep| yield to another thread but is not immediately runnable,
+        it must be woken up with \verb|thread_wakeup|.
+
+    \item What is the purpose of mi\_switch function?
+
+        To perform a context switch. Checks magic numbers at the bottom of the stack to ensure that the
+        function didn't overflow the stack. Then adds the thread calling the switch to the runnable or
+        sleeping thread queue depending on if \verb|mi_switch| was called by by \verb|thread_yield|
+        or \verb|thread_sleep| respectively. Then calls the scheduler to get the next thread to run,
+        and calls a function to perform the actual context switch.
+
+    \item Where is the scheduler function located and what does the current scheduler do?
+
+        The scheduler function is in \verb|kern/thread/scheduler.c|. The current scheduler
+        waits for a thread to enter the runnable queue, and then returns the head of the runnable queue,
+        ie the next thread to run. So the scheduler runs threads in a FIFO queue, it uses
+        round-robin scheduling.
+
+\end{enumerate}
+
+
+\end{document}

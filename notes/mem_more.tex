@@ -1,0 +1,119 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{Memory Management cont.}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\section{Allocation policy}
+
+Local allocation policy: only page in same proc
+
+Global allocation: takes more time to scan, but less page faults
+\begin{itemize}
+    \item better when process size chagnes (big $\to$ small)
+\end{itemize}
+
+Allocation 
+\begin{itemize}
+    \item allocate equally
+    \item proportional to process size
+    \item allocate based on page fault frequency: track page fault freq.
+
+        upper and lower bound for page faults, allocate and deallocate pages
+
+    \item working set page replacement alg only works for local allocation b/c of virtual times
+
+    \item swapping processes to disk
+\end{itemize}
+
+page size
+\begin{itemize}
+    \item on avg, half of last page is empty
+    \item smaller page = less wasted space, but larger table, slower loading time
+    \item s = avg proc size, p = page size, e = page table entry size
+
+        overhead = (s / p) e + p/2
+
+        optimal page size = sqrt(2 s e)
+\end{itemize}
+
+separate instruction and data spaces
+\begin{itemize}
+    \item I: instruction
+    \item D: data
+    \item fork doesn't have to re-copy instruction, only copy data space on write
+
+        process table points to same program/data space
+
+        data space is marked R, after copy on write, mark R/W
+    \item DLL: shared libraries
+
+        compiling printf: don't have duplicate copies of the library. implementation of shared library
+            is just pointer, not actual binary in compiled program.
+\end{itemize}
+
+mapped files: map RAM address to IO.
+
+cleaning
+\begin{itemize}
+    \item paging daemon: in backgroup, periodically checks available memory
+
+        if available mem too low, pre-select pages to evice, if dirty then schedule writes
+
+    \item 2-handed clock: first hand is cleaning daemon, 2nd hand is page replacement
+
+        need enough buffer b/t cleaning and replacment
+\end{itemize}
+
+instruction can span multiple bytes,autoincreementing must have handware support
+
+A starts IO request, gets suspeneded. B runs and get a page fault. Must not be page A is using for IO.
+\begin{itemize}
+    \item pinning "locking" a page into memory
+    \item kenerl buffers for IO, then copy to use page frame
+\end{itemize}
+
+backing store: 1 to 1 map or disk map that maps from virtual page to swap area on HDD
+
+segmentation
+\begin{itemize}
+    \item 1d address space with growing tables can collide
+    \item virtual addr space for each table
+    \item segments: symbol table, source text, constants, parse tree, call stack...
+    \item page table for each process and each segment
+\end{itemize}
+
+segmentation with paging: MULTICS
+\begin{enumerate}
+    \item segment desscription points to page table RAM addr for segment
+    \item segment number (18-bit) + page number (6-bit) + page offset (10-bit)
+
+        $2^{18}$ segments, $2^6$ pages, $2^{10}$ byte pages
+
+    \item now TLB needs segment number too (and virtual to page, protection, age, present/dirty)
+    \item 256K segments, 64k 36-bit words
+\end{enumerate}
+
+Pentium
+\begin{enumerate}
+    \item segmentation obsolete in x86\_64
+    \item 16k segements, 1 billion 32-bit words
+    \item each program has LDT (local descriptor table), 1 GDT (global descriptor table) for OS
+    \item selector: index + gdt/ldt
+
+        use selector to find descriptor, descriptor base addr + offset
+
+    \item if paging, then go to page table b/c this is a virtual addr
+
+        then 2-level page table: dir $\to$ page $\to$ byte (using offset)
+\end{enumerate}
+
+\end{document}

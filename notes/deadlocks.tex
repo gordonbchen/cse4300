@@ -1,0 +1,94 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{Deadlocks}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{}
+preemptable vs nonpreemptable resources
+\begin{itemize}
+    \item preemptable: CPU, memory
+    \item nonpreemptable: printer
+\end{itemize}
+
+request, use, release resources.
+
+deadlock if locks acquired in different orders
+
+conditions for deadlocks
+\begin{itemize}
+    \item mutual exclusion: resource that cannot be shared
+    \item hold and wait: process hold onto resource and request another resource
+    \item no preemption: OS cannot take resources, process has to voluntarily give up resource
+    \item circular wait: cycle in wanted resources
+\end{itemize}
+
+dealing with deadlocks
+\begin{itemize}
+    \item ostrich algorithm: ignore
+    \item detect deadlocks and recover
+
+        resource graph, detect cycle using DFS
+        \begin{itemize}
+            \item start on random unmarked node
+            \item start DFS, marking nodes. if you revisit node then cycle
+        \end{itemize}
+
+        resources in existence: $(E_1, \dots, E_m)$
+
+        current allocation matrix: $C_{ij}$ \# of j resources allocated to ith proc
+
+        available resources: A = E - colsum(C)
+
+        Request matrix
+
+        detect deadlock: if row in matrix (proc) $<$ available resources, then that proc can run
+        then add proc's resources to available. iterate until either requests are empty
+        or cannot run any proc.
+
+        recovery:
+        \begin{itemize}
+            \item preemption: cancel job (but can't stop write to disk or else corrupt)
+            \item rollback: databases
+            \item killing processes
+        \end{itemize}
+
+    \item dynamic avoidance: careful resource allocation, OS checks if giving resource can make deadlock
+
+        unsafe state: can have a deadlock
+
+        don't go into unsafe cells, check if going into unsafe states
+
+        banker's algorithm: give resources to process that will terminate, repeat
+
+        practically useless b/c you dont' know what resources your process will need
+
+    \item prevention: remove condition
+        \begin{itemize}
+            \item mutual exclusion: not practical, will have resources that cannot be share
+            \item hold and wait: need to know apriori all resources a process needs
+
+                waste of resources: holding printer wil typing
+
+            \item no preemption: virtualize, printer daemon
+            \item circular wait: numerically ordered resources, no cycle
+
+                problem: programmers won't acquire in order
+        \end{itemize}
+
+    \item 2-phase locking: lock (and unlock) all at once, if you fail, then retry later
+
+        communication deadlock: timeouts
+
+        livelock: dining philosophers, not deadlock, but probability
+
+        starvation: priority, not deadlock
+\end{itemize}
+\end{document}

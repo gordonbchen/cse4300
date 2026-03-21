@@ -138,6 +138,7 @@ void
 lock_acquire(struct lock *lock)
 {
 	assert(lock != NULL);
+	assert(in_interrupt==0);
 
 	int spl = splhigh();
 	while (lock->locked == 1) {
@@ -217,6 +218,7 @@ cv_wait(struct cv *cv, struct lock *lock)
 {
 	assert(cv != NULL);
 	assert(lock != NULL);
+	assert(in_interrupt==0);
 
 	int spl = splhigh();
 	assert(lock->locked == 1);

@@ -216,6 +216,7 @@ void
 cv_wait(struct cv *cv, struct lock *lock)
 {
 	assert(cv != NULL);
+	assert(lock != NULL);
 
 	int spl = splhigh();
 	assert(lock->locked == 1);
@@ -230,6 +231,7 @@ void
 cv_signal(struct cv *cv, struct lock *lock)
 {
 	assert(cv != NULL);
+	assert(lock != NULL);
 
 	int spl = splhigh();
 	assert(lock->locked == 1);
@@ -242,6 +244,7 @@ void
 cv_broadcast(struct cv *cv, struct lock *lock)
 {
 	assert(cv != NULL);
+	assert(lock != NULL);
 
 	int spl = splhigh();
 	assert(lock->locked == 1);

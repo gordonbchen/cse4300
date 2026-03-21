@@ -1,0 +1,308 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{amsmath}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\parindent=0pt
+
+\definecolor{codebg}{RGB}{245,245,240}      % code background
+\definecolor{filebg}{RGB}{220,220,215}      % filename bar
+\definecolor{framecol}{RGB}{170,170,170}    % border color
+\definecolor{commentcol}{RGB}{100,100,100}      % comment color
+\lstdefinestyle{mycode}{
+    language=C,
+    basicstyle=\ttfamily\small,
+    commentstyle=\color{commentcol},
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    breaklines=true,
+    tabsize=4
+}
+\newtcblisting{codefile}[2][]{%
+    enhanced,
+    colback=codebg,
+    colframe=framecol,
+    boxrule=0.5pt,
+    arc=2pt,
+    left=6pt,
+    right=6pt,
+    top=6pt,
+    bottom=6pt,
+    listing only,
+    listing options={style=mycode},
+    title=\texttt{#2},
+    colbacktitle=filebg,
+    coltitle=black,
+    fonttitle=\small\ttfamily,
+    attach boxed title to top left={
+        yshift=-2mm,
+        xshift=0mm
+    },
+    boxed title style={
+        boxrule=0.5pt,
+        colframe=framecol,
+        colback=filebg,
+        arc=2pt
+    },
+    #1
+}
+
+
+\title{CSE 4300: Prog 4}
+\author{Gordon Chen, gbc24001}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\begin{codefile}{synch.h}
+struct lock {
+    char *name;
+    volatile int locked;
+    volatile struct thread *owner;
+};
+\end{codefile}
+The \verb|lock| struct needs a boolean \verb|locked| flag and a pointer to the current lock \verb|owner|.\\
+
+
+\begin{codefile}{synch.c}
+struct lock *
+lock_create(const char *name)
+{
+    struct lock *lock;
+
+    lock = kmalloc(sizeof(struct lock));
+    if (lock == NULL) {
+        return NULL;
+    }
+
+    lock->name = kstrdup(name);
+    if (lock->name == NULL) {
+        kfree(lock);
+        return NULL;
+    }
+
+    lock->locked = 0;
+    lock->owner = NULL;
+    return lock;
+}
+\end{codefile}
+Initialize the lock to unlocked and no owner.\\
+
+
+\begin{codefile}{synch.c}
+void
+lock_destroy(struct lock *lock)
+{
+    assert(lock != NULL);
+
+    int spl = splhigh();
+    assert(lock->locked == 0);
+    assert(lock->owner == NULL);
+    assert(thread_hassleepers(lock) == 0);
+    splx(spl);
+
+    kfree(lock->name);
+    kfree(lock);
+}
+\end{codefile}
+Check that the lock is unlocked and that no threads are sleeping on the lock before destroying.\\
+
+
+\begin{codefile}{synch.c}
+void
+lock_acquire(struct lock *lock)
+{
+    assert(lock != NULL);
+
+    int spl = splhigh();
+    while (lock->locked == 1) {
+        thread_sleep(lock);
+    }
+    assert(lock->locked == 0);
+    assert(lock->owner == NULL);
+    lock->locked = 1;
+    lock->owner = curthread;
+    splx(spl);
+}
+\end{codefile}
+Sleep until the lock is unlocked. Then lock and set the owner to the current thread.\\
+
+
+\begin{codefile}{synch.c}
+void
+lock_release(struct lock *lock)
+{
+    assert(lock != NULL);
+
+    int spl = splhigh();
+    assert(lock->locked == 1);
+    assert(lock->owner == curthread);
+    lock->locked = 0;
+    lock->owner = NULL;
+    thread_wakeup(lock);
+    splx(spl);
+}
+\end{codefile}
+Check that the thread trying to release is the thread that has the lock.
+Then unlock and wakup all threads that are sleeping on the lock.\\
+
+
+\begin{codefile}{synch.c}
+int
+lock_do_i_hold(struct lock *lock)
+{
+    assert(lock != NULL);
+
+    int spl = splhigh();
+    int ihold = (lock->locked) && (lock->owner == curthread);
+    splx(spl);
+
+    return ihold;
+}
+\end{codefile}
+The current thread holds the lock if the lock is locked and the owner is the current thread.\\
+
+
+\begin{codefile}{synch.c}
+struct cv *
+cv_create(const char *name)
+{
+    struct cv *cv;
+
+    cv = kmalloc(sizeof(struct cv));
+    if (cv == NULL) {
+        return NULL;
+    }
+
+    cv->name = kstrdup(name);
+    if (cv->name==NULL) {
+        kfree(cv);
+        return NULL;
+    }
+    return cv;
+}
+\end{codefile}
+I left \verb|cv_create| and \verb|struct cv| unchanged. I don't think any more fields in \verb|cv| are
+required.\\
+
+
+\begin{codefile}{synch.c}
+void
+cv_destroy(struct cv *cv)
+{
+    assert(cv != NULL);
+
+    int spl = splhigh();
+    assert(thread_hassleepers(cv) == 0);
+    splx(spl);
+
+    kfree(cv->name);
+    kfree(cv);
+}
+\end{codefile}
+Check that no threads are sleeping on the cv before destroying.\\
+
+
+\begin{codefile}{synch.c}
+void
+cv_wait(struct cv *cv, struct lock *lock)
+{
+    assert(cv != NULL);
+
+    int spl = splhigh();
+    assert(lock->locked == 1);
+    assert(lock->owner == curthread);
+    lock_release(lock);
+    thread_sleep(cv);
+    lock_acquire(lock);
+    splx(spl);
+}
+\end{codefile}
+Check that the current thread has the lock, then release the lock, and sleep on the cv.
+When the thread wakes up, acquire the lock.\\
+
+
+\begin{codefile}{synch.c}
+void
+cv_signal(struct cv *cv, struct lock *lock)
+{
+    assert(cv != NULL);
+
+    int spl = splhigh();
+    assert(lock->locked == 1);
+    assert(lock->owner == curthread);
+    thread_wakeup_one(cv);
+    splx(spl);
+}
+\end{codefile}
+Check that the current thread has the lock. Then wake up 1 thread sleeping on the cv.
+\verb|thread_wakeup_one| is a new function I defined in \verb|thread.c|, see below.\\
+
+
+\begin{codefile}{synch.c}
+void
+cv_broadcast(struct cv *cv, struct lock *lock)
+{
+    assert(cv != NULL);
+
+    int spl = splhigh();
+    assert(lock->locked == 1);
+    assert(lock->owner == curthread);
+    thread_wakeup(cv);
+    splx(spl);
+}
+\end{codefile}
+Check that the current thread has the lock. Then wakeup all threads sleeping on the cv.\\
+
+
+\begin{codefile}{thread.h}
+/*
+ * Cause at most 1 thread sleeping on the specified address to wake up.
+ * Interrupts must be disabled.
+ */
+void thread_wakeup_one(const void *addr);
+\end{codefile}
+
+\begin{codefile}{thread.c}
+/*
+ * Wake up at most one thread sleeping on "sleep address"
+ * ADDR.
+ */
+void
+thread_wakeup_one(const void *addr)
+{
+    int i, result;
+
+    // meant to be called with interrupts off
+    assert(curspl>0);
+
+    // This is inefficient. Feel free to improve it.
+
+    for (i=0; i<array_getnum(sleepers); i++) {
+        struct thread *t = array_getguy(sleepers, i);
+        if (t->t_sleepaddr == addr) {
+
+            // Remove from list
+            array_remove(sleepers, i);
+
+            /*
+             * Because we preallocate during thread_fork,
+             * this should never fail.
+             */
+            result = make_runnable(t);
+            assert(result==0);
+            return;
+        }
+    }
+}
+\end{codefile}
+Wake up a single thread for \verb|cv_signal|. This same as \verb|thread_wakeup| except that instead of
+waking up all sleeping threads, it returns after waking up 1 thread.
+
+
+\end{document}

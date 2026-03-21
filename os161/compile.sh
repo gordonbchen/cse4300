@@ -3,8 +3,8 @@ set -euo pipefail
 # ./configure --ostree=$HOME/work/root --toolprefix=cse4300-
 
 cd kern/conf
-./config ASST0
-cd ../compile/ASST0
+./config ASST1
+cd ../compile/ASST1
 
 make depend
 make
@@ -14,4 +14,4 @@ cd $HOME/work/os161
 make
 
 cd ../root
-sys161 kernel-ASST0
+sys161 kernel-ASST1

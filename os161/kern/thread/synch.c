@@ -128,10 +128,9 @@ lock_destroy(struct lock *lock)
 	assert(lock->locked == 0);
 	assert(lock->owner == NULL);
 	assert(thread_hassleepers(lock) == 0);
-	splx(spl);
-
 	kfree(lock->name);
 	kfree(lock);
+	splx(spl);
 }
 
 void
@@ -207,10 +206,9 @@ cv_destroy(struct cv *cv)
 
 	int spl = splhigh();
 	assert(thread_hassleepers(cv) == 0);
-	splx(spl);
-
 	kfree(cv->name);
 	kfree(cv);
+	splx(spl);
 }
 
 void

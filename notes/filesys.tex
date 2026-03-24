@@ -1,0 +1,84 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{File Systems}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Memory}
+Dynamic memory (DRAM): capactior charged/discharged
+
+Magnetic tape / disk: flux direction north/south
+
+Read-only compact disct: no pit, pit, laser burns pit, reflection angle changes
+
+
+Volatile: loses data on turn off
+
+
+4x32 RAM: 4 addressable locations, 32 bits at each location
+
+SRAM: flip-flops
+
+DRAM: capacitors, must be refreshed
+
+SSD: flash memory, P(rogram) / E(rase) cycle limit
+
+Magnetic HDD: magnetic spinning thing
+
+\section{File systems}
+\begin{itemize}
+    \item Sector 0 Master Boot Record, partition table, partitions
+    \item Partition: boot block, superblock, free space mgmt, inodes, ...
+
+    \item BIOS executes MBR program. MBR program finds active partition (where OS is), runs boot block,
+        boot block loads OS into RAM.
+
+    \item Contiguous allocation: removing files creates holes, can't grow files
+
+        Good for CD-Rom b/c never change memory
+
+    \item Linked-list allocation: allocate in blocks
+
+        files are scattered through the system: pointer to physical block and next physical block
+
+        sequential (not random) access b/c have to go through block pointers
+
+        seeing which block is hard b/c block size is not a power of 2 b/c of pointer
+
+    \item FAT: file allocation table (windows)
+
+        start of partition
+
+        in directory structure: store 1st block num. then fat stores next block, table[block idx] = next idx.
+
+        FAT[last block] = -1
+
+        requires huge FAT: 2GB disk, 1kb block = 200 M entries
+
+        fixed size based on partition size and block size
+
+    \item I-nodes (linux)
+
+        file attributes
+
+        first 10 addresses of data blocks (based on avg file size)
+
+        address of disk block containing additional pointers to indirect blocks
+
+        indirect blocks points to data blocks or other pointer blocks
+
+        1 single indirect block + 1 double indirect block + 1 triple indirect block \\
+
+        ex: 10 initial addr, 1kb blocks, 4-byte pointer to data block
+
+            max file size = $10*1Kb + (1024/4)*1Kb + (256^2)*1Kb + (256^3)*1Kb$
+
+\end{itemize}
+\end{document}

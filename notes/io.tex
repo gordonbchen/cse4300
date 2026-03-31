@@ -1,0 +1,80 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{Input/Output}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Devices}
+Device controller: between driver and hardware, error correction
+\begin{enumerate}
+    \item serial bits to byte block
+    \item error correction
+    \item copy data to main memory
+    \item communicating with controllers
+
+        control register assigned IO port: mobo has specific ports, device can only connect to certain ports
+
+        memory map: maps control register to memory space
+\end{enumerate}
+
+interrupts:
+\begin{enumerate}
+    \item dedicated line (pin) to interrupt controller on mobo
+    \item mouse click, signal saves in control register
+    \item controller tells CPU interrupt raised (which device)
+    \item CPU calls instruction to read interrupt port (IN AX, 15)
+    \item to send instuction: write in serial to controller port (OUT 100, AX)
+    \item device controller reads bytes, then prints
+\end{enumerate}
+
+memory map:
+\begin{enumerate}
+    \item write in C, don't need to use asm insructions
+    \item addresses in RAM are mapped to IO port addr
+    \item device driver can be writeen in C (no need for special ASM instruction, just files)
+    \item os ensures control registers aren't in user virtual addr
+
+    \item problem with caching: CPU uses cached value, doesn't go to RAM (but voltaile b/c IO)
+
+        set cache disabled bit in memory mapped IO page
+
+        PCI brige b/t CPU and main memory, forwards memory requests to peripheral device bus,
+        that area in main memory has to be empty
+\end{enumerate}
+
+direct memory access
+\begin{enumerate}
+    \item fread(``x.txt", \&buf, 100)
+    \item file system uses inode structure to find ``x.txt", finds data blocks
+    \item OS writes magic num + block number + buf to disk controller to read
+    \item disk controller reads to internal buffer, error check, raises interrupt
+    \item OS copies internal register to main memory
+    \item problem: naive reading will cause interrupt per block read
+
+        CPU tells dma controller to interrupt only after all blocks are read,
+        disk controller copies block to main memory notifies dma buffer,
+        dma controlelr raises interrupt at the end. must lock bus to copy to main memory
+
+        reduces \# of interrupts to CPU
+
+    \item word at a time mode: cycle stealing, locks bus
+    \item burst mode: locks bus, copies many blocks at once
+    \item device to device copy using dma internal buffer instead of main memory
+\end{enumerate}
+
+t1 ns to acquire bus, t2 ns to transfer 1 word over the bus. 1000 words
+\begin{itemize}
+    \item 1 word at a time: 1000 * 3 * (t1 + t2), acquire + command, acquire + send, acquire + ack
+
+    \item burst mode: (t1 + t2) + t1 + 1000*t2 + (t1+t2), acquire + command, acquire, 1000 copy, acquire ack
+\end{itemize}
+
+ack transfer also required sending a word over the bus
+\end{document}

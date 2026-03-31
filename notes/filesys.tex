@@ -60,25 +60,117 @@ Magnetic HDD: magnetic spinning thing
 
         FAT[last block] = -1
 
-        requires huge FAT: 2GB disk, 1kb block = 200 M entries
+        requires huge FAT: 2GB disk, 1kb block = 2 M entries
 
         fixed size based on partition size and block size
 
-    \item I-nodes (linux)
+        Disk access to follow idxs and collect all blocks nums, then disk access to read.
 
-        file attributes
+\end{itemize}
 
-        first 10 addresses of data blocks (based on avg file size)
+\section{I-nodes (linux)}
 
-        address of disk block containing additional pointers to indirect blocks
+partition : boot block, free space mgmt (bitmap), inodes, root dir, files and dirs \\
 
-        indirect blocks points to data blocks or other pointer blocks
+I-node
+\begin{itemize}
+    \item file attributes
+
+    \item first 10 addresses of data blocks (based on avg file size)
+
+    \item address of disk block containing additional pointers to indirect blocks
+
+    \item Indirect blocks: point to data blocks or other pointer blocks
 
         1 single indirect block + 1 double indirect block + 1 triple indirect block \\
 
         ex: 10 initial addr, 1kb blocks, 4-byte pointer to data block
 
             max file size = $10*1Kb + (1024/4)*1Kb + (256^2)*1Kb + (256^3)*1Kb$
-
 \end{itemize}
+
+Finding a file: /usr/ast/mbox
+\begin{enumerate}
+    \item starting in root dir: finds usr w/ inode 6 (reads usr data block as dir structure),
+        then go to inode 6, see ast in inode 26,
+        then go to 26, sees mbox in inode 26, the finds mbox in inode 26, sees from file attr that
+        mbox is file, then reads addr of mbox data blocks in inode.
+
+        . : curr inode
+
+        .. : prev inode
+
+\end{enumerate}
+
+OS doesn't need to know how to map block number to physical disk, handled by disk driver
+
+Sharing files
+\begin{itemize}
+    \item Hard link: shared file under both dirs
+
+        Counter for how many owners there are, delete at 0
+
+        Should the file be deleted when the owner deletes it or when counter = 0?
+
+    \item Symlink: file with path to shared file
+
+        Not actually under both dirs
+\end{itemize}
+
+Dir implementation: max file name length vs pointer to file name on heap \\
+
+file allocation size matters for spinning disk
+\begin{itemize}
+    \item more blocks = more seeking and track changing
+    \item allocation unit = 4 sectors (blocks), less blocks you have to seek
+    \item increasing block size increases data rate (read speed) but decreases storage usage.
+\end{itemize}
+
+Disk w/ 1mb per track. rotation time = 8.33ms. avg seek time = 5ms. time to read block of k bytes?
+\begin{itemize}
+    \item seek time = 5ms
+    \item avg rotation time before seeing data = 8.33/2 ms
+    \item total time = 5 + 8.33/2 + 8.33 * (k / 1024) / 1024\\
+\end{itemize}
+
+tracking free blocks
+\begin{itemize}
+    \item bitmap:
+    \item linked list: 
+    \item list of free blocks in RAM to avoid going to HDD to find free blocks
+
+        if list fills up, put in HDD
+\end{itemize}
+
+
+\section{Backups}
+\begin{itemize}
+    \item Physical dump: copy everything (all blocks)
+
+        no incremental dump
+
+        cannot restore individual files
+
+        dumps unused blocks
+
+        dumps bad blocks: disk scanning tool to find areas of hard disk that fail read/write test
+
+    \item Logical dump: only dump things that changed
+
+        bitmap of all dirs: unmark dirs w/out modified files
+
+        dump only dirs and modified files, then you can reconstruct
+\end{itemize}
+
+file system consistency
+\begin{itemize}
+    \item deleted file: mark block free, update inode, free block list
+    \item what if crash before adding to free block list?
+    \item go through inode structure, build list of blocks in use
+
+        blocks in use and free blocks should be complementary
+
+    \item block allocated to 2 files: make 1 file use a free block
+\end{itemize}
+
 \end{document}

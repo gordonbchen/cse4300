@@ -2,6 +2,7 @@ dev_env/custom-os161.zip
 dev_env/OS161Env.ova
 
 latexbuild/
+typstbuild/
 
 root/
 os161/kern/compile/

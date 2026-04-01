@@ -184,7 +184,11 @@ Let us assume that a file system uses 4-KB disk block size.
 
     So we do not have enough information to tell.
 
-    #todo[What did they want here?]
+    However, for non-pathological cases with a median file size of 12 KB, in general, the file system waste
+    will be lower than scenario (a) because most files will fill up 3 blocks, with files
+    potentially a underfilling the last block or some bytes spilling into the 4th block. Since files mostly
+    span multiple blocks, many blocks will be completely full and only some will be underfull,
+    which causes better block utilization and less waste than one where $1/4$ of every block is wasted.
   ]
 
 

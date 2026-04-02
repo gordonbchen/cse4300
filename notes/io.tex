@@ -69,12 +69,68 @@ direct memory access
     \item device to device copy using dma internal buffer instead of main memory
 \end{enumerate}
 
-t1 ns to acquire bus, t2 ns to transfer 1 word over the bus. 1000 words
+t1 ns to acquire bus, t2 ns to transfer 1 word over the bus.
+1000 words, ack transfer also required sending a word over the bus
 \begin{itemize}
     \item 1 word at a time: 1000 * 3 * (t1 + t2), acquire + command, acquire + send, acquire + ack
 
     \item burst mode: (t1 + t2) + t1 + 1000*t2 + (t1+t2), acquire + command, acquire, 1000 copy, acquire ack
 \end{itemize}
 
-ack transfer also required sending a word over the bus
+interrupt
+\begin{enumerate}
+    \item printer sends signal over bus to interrupt controller
+    \item interrupt controller tells CPU interrupt, gives interrupt address, disable interrupts
+    \item CPU dumps current pc, registers onto stack
+    \item jumps to interrupt vector table[interrupt address], runs interrupt service
+    \item save pc and registers to process table
+    \item do actual service, read specific register on printer via IO
+    \item go to OS, OS schedules, reload registers and PC
+\end{enumerate}
+
+pipelining and interrupts
+\begin{enumerate}
+    \item interupt when some instructions are partially done (imprecise interrupt)j
+    \item lets some instructions fully finish, terminate other ones (precise interrupt)
+\end{enumerate}
+
+software interrupts
+\begin{enumerate}
+    \item INT instruction (from user level)
+    \item gives control to OS (printf)
+    \item instruction: INT X, give syscall args.
+    \item load file, sys read, read file bytes 
+\end{enumerate}
+
+io software
+\begin{enumerate}
+    \item sync (blocking) vs async: OS makes interrupt driven look blocking (easier programming)
+    \item io buffering
+\end{enumerate}
+
+programmed io vs interrupt-driven
+\begin{enumerate}
+    \item programmed io: busy waiting
+    \item interrupts
+
+        user calls print system call, enable interrupts, put a char into printer
+
+        on printer interrupt, send another character
+
+        printer interrupts on every character, use DMA controller
+
+    \item DMA: user sets up dma and sleeps, dma handles printing, CPU interrupt unblocks user at the very end
+\end{enumerate}
+
+magnetic disks
+\begin{enumerate}
+    \item seach sector has preamble, data, ecc
+    \item cylinder skew: shift 0s in sectors so that when you move the needle the next 0 sector is right there
+    \item dma buffer size: \# sectors you can store in dma so you don't have to wait another rotation
+
+        then ``interleave" during formatting so that once you copy dma to ram, next section is under needle
+
+        modern disks just read whole track into buffer
+\end{enumerate}
+
 \end{document}

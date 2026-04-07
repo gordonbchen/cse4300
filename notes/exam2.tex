@@ -1,0 +1,137 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{Exam 2 Review}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\section{Ch 3}
+Starting at ``design issues for paging system"
+
+\begin{enumerate}
+    \item Local vs global alloc
+
+        local: page replaces page in same process (working set is local)
+
+        global: page replaces page in any process
+
+    \item space per proc: equal alloc, proc size
+
+        page fault rate per proc, boundary for page fault rate, high page fault rate = get more pages
+
+        load control: all procs need more pages, suspend some and give up pages, mix CPU-bound + IO-bound
+
+    \item page table overhead = (process size / page size) * page entry size + (page size / 2)
+
+        optimal page size = sqrt(2 * process size + page entry size)
+
+    \item separate instruction and data spaces
+
+        same program running multiple times: instruction space is the same, data space is copied on write
+
+        shared libraries (dll + so): programs have pointer to library in ram (don't have to load multiple times, update at once)
+
+    \item cleaning policy
+
+        paging daemon: periodically evict + write pages if available pages is too low
+
+        2 handed clock: 1st hand = cleaning daemon, 2nd hand = page replacement alg
+
+    \item page fault: hardware interrupt (not in TLB), kernel checks page table + maybe fetch page
+
+    \item instruction backup: pipe
+
+    \item lock pages in memory: A does IO + gets suspended, B gets page fault (global page replacemnet), claims file A is using for IO
+
+        pinning: lock page
+
+        kernel buffers for IO
+
+    \item swap: store pages not in page table in disk TODO
+
+    \item segmentation: each variable can get own segment (data, stack, heap), programmer defines segments
+
+        without paging: whole segments get brought in / swapped out, compaction (address translation w/ + base register), physical addr = segment table[segment number] + offset
+
+        with paging: MULTICS
+        \begin{enumerate}
+            \item descriptor segment has pointers to page tables
+            \item multics virtual address = segment number + page number + offset
+            \item physical addr = segment table [segment number] [page number] + offset
+            \item multics tlb: index on segment number, virtual addr, gets page number
+        \end{enumerate}
+
+        Pentum: 256K segments, 64k words
+        \begin{enumerate}
+            \item global (0) (for OS / system) vs local (1) descriptor table (for program)
+            \item selector: which segment, offset: which word in segment
+            \item selector gets global/local descriptor, extract segment base addr, linear addr = segment base + offset
+
+                without paging: linear addr = physical addr
+
+                with paging: linear addr = virtual addr = page dir number | page table number | offset
+        \end{enumerate}
+
+        Intel x86: 16k segments, 1 billion words
+
+        x86-64: no segmentation
+\end{enumerate}
+
+
+\section{Ch 6: Deadlocks}
+\begin{enumerate}
+    \item detection + recovery: graph / matrix, TODO
+    \item dynamic avoidance: check at resource allocation time
+    \item prevention:
+
+        mutual exclusion: not practical b/c somethings need single access
+
+        circular wait: number resources in increasing order, only can request resources adter you
+
+    \item 2 phase locking: databases
+
+        communication deadlock: timeout + sequence numbering
+
+        livelock: dining philosophers
+
+        priority starvation
+\end{enumerate}
+
+
+\section{Ch. 4: Filesystems}
+\begin{enumerate}
+    \item file system layout
+        \begin{enumerate}
+            \item bios, mbr, boot block, loads os
+            \item master boot record: which is active partition
+            \item partitions: boot block ...
+        \end{enumerate}
+
+    \item allocation
+
+        contiguous
+
+        linked list alloc: pointer to next, block. no random access, must be sequential
+
+        FAT (file allocation table): proportional to size of block
+
+        INodes (linux): file attr + addr to data blocks + addr to (1x, 2x, 3x) indirect blocks
+        \begin{enumerate}
+            \item indirect block: pointer to block of pointers to blocks
+        \end{enumerate}
+
+    \item backups
+
+        physical dump: dump everything
+
+        logical dump: bitmap for modified files, only dump chains of dirs w/ modified files
+\end{enumerate}
+
+\end{document}

@@ -12,13 +12,12 @@
 \maketitle
 
 
-\section{Ch 3}
-Starting at ``design issues for paging system"
+\section{Ch 3: Memory}
 
 \begin{enumerate}
     \item Local vs global alloc
 
-        local: page replaces page in same process (working set is local)
+        local: page replaces page in same process (working set is local b/c uses local process time)
 
         global: page replaces page in any process
 
@@ -30,7 +29,7 @@ Starting at ``design issues for paging system"
 
     \item page table overhead = (process size / page size) * page entry size + (page size / 2)
 
-        optimal page size = sqrt(2 * process size + page entry size)
+        optimal page size = sqrt(2 * process size * page entry size)
 
     \item separate instruction and data spaces
 
@@ -46,17 +45,27 @@ Starting at ``design issues for paging system"
 
     \item page fault: hardware interrupt (not in TLB), kernel checks page table + maybe fetch page
 
-    \item instruction backup: pipe
+    \item implementation issues
 
-    \item lock pages in memory: A does IO + gets suspended, B gets page fault (global page replacemnet), claims file A is using for IO
+        \begin{enumerate}
+            \item instruction backup: page fault vauses instruction to stop halfway through,
+                OS doesn't know where to restart
 
-        pinning: lock page
 
-        kernel buffers for IO
+            \item A does IO + gets suspended, B gets page fault (global page replacemnet), claims file A is using for IO
 
-    \item swap: store pages not in page table in disk TODO
+                pinning: lock page
 
-    \item segmentation: each variable can get own segment (data, stack, heap), programmer defines segments
+                kernel buffers for IO
+        \end{enumerate}
+
+    \item backing store: where to put evicted pages in disk
+
+        static swap: swap area same size as virtual addr space, stores pages not in page table
+
+        dynamic: swap area is smaller, disk map
+
+    \item segmentation: each variable can get own segment (data, stack, heap), programmer (compiler) defines segments
 
         without paging: whole segments get brought in / swapped out, compaction (address translation w/ + base register), physical addr = segment table[segment number] + offset
 
@@ -70,32 +79,31 @@ Starting at ``design issues for paging system"
 
         Pentum: 256K segments, 64k words
         \begin{enumerate}
-            \item global (0) (for OS / system) vs local (1) descriptor table (for program)
-            \item selector: which segment, offset: which word in segment
-            \item selector gets global/local descriptor, extract segment base addr, linear addr = segment base + offset
-
-                without paging: linear addr = physical addr
+            \item selector: global (0) (for OS / system) vs local (1) descriptor table (for program), index
+            \item (global / local) descriptor table [index] = selector, offset
+            \item selector points to segment descriptor, linear addr = segment base + offset
 
                 with paging: linear addr = virtual addr = page dir number | page table number | offset
         \end{enumerate}
-
-        Intel x86: 16k segments, 1 billion words
-
-        x86-64: no segmentation
 \end{enumerate}
 
 
 \section{Ch 6: Deadlocks}
 \begin{enumerate}
-    \item detection + recovery: graph / matrix, TODO
+    \item deadlock causes
+        \begin{enumerate}
+            \item resource requires mutual exclusion
+            \item processes can request new resources
+            \item processes cannot be preempted
+            \item circular wait chain
+
+                solution: number resources, you can only acquire in order
+        \end{enumerate}
+
+    \item detection: cycles are deadlocks, matrix method
+    \item recovery: preempt, rollback, kill
     \item dynamic avoidance: check at resource allocation time
-    \item prevention:
-
-        mutual exclusion: not practical b/c somethings need single access
-
-        circular wait: number resources in increasing order, only can request resources adter you
-
-    \item 2 phase locking: databases
+    \item 2 phase locking: lock before changing, databases
 
         communication deadlock: timeout + sequence numbering
 
@@ -109,8 +117,8 @@ Starting at ``design issues for paging system"
 \begin{enumerate}
     \item file system layout
         \begin{enumerate}
-            \item bios, mbr, boot block, loads os
-            \item master boot record: which is active partition
+            \item boot sequence: bios, mbr, boot block, loads os
+            \item master boot record: loads active partition
             \item partitions: boot block ...
         \end{enumerate}
 
@@ -120,11 +128,18 @@ Starting at ``design issues for paging system"
 
         linked list alloc: pointer to next, block. no random access, must be sequential
 
-        FAT (file allocation table): proportional to size of block
+        FAT (file allocation table): idx of next block, linked list in table
 
         INodes (linux): file attr + addr to data blocks + addr to (1x, 2x, 3x) indirect blocks
         \begin{enumerate}
-            \item indirect block: pointer to block of pointers to blocks
+            \item indirect block: pointer to block of pointers to data blocks
+            \item symlink (file w/ path) vs hard link (also in inode)
+            \item get data block for /root/home/me.txt:
+                \begin{enumerate}
+                    \item root inode in memory. find inode for home.
+                    \item fetch home inode. fetch home block.
+                    \item find me.txt inode. fetch me.text block.
+                \end{enumerate}
         \end{enumerate}
 
     \item backups

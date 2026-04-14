@@ -173,4 +173,38 @@ file system consistency
     \item block allocated to 2 files: make 1 file use a free block
 \end{itemize}
 
+
+\section{Caching}
+\begin{enumerate}
+    \item Caching disk blocks: buffer cache hash table: head = LRU, tail = MRU
+
+        system can crash before writeback, then changes cached in RAM, never flushed to HDD
+
+        LRU: inodes rarely referenced 2x, so will be in cache for a long time, danger for crash
+
+        modified LRU: if block not needed again / critical file, then go to start of list (LRU)
+
+        windows write-through cache: write to disk immediately, but also cache for read
+
+        linux sync / windows flush file buffers: flush to disk
+
+    \item block read ahead: bit for sequential / random access
+
+        if sequential: keep reading block ahead (to save on having to seek + find start again)
+
+    \item reduce disk arm motion: cylinder group w/ own inodes ot keep inodes + data close
+
+        SSD: constant read/write time, spread out data for lifetime
+
+    \item defragmentation: consolidate HDD blocks
+
+    \item log structured file system: most disk ops are writes
+
+        circular log: repeat (inodes, datablocks)
+
+        remove a file: remove from dir, release inode to free pool, release disk block to free pool
+
+        cleaner thread: defragment
+\end{enumerate}
+
 \end{document}

@@ -131,6 +131,76 @@ magnetic disks
         then ``interleave" during formatting so that once you copy dma to ram, next section is under needle
 
         modern disks just read whole track into buffer
+
+    \item disk arm scheduling: first come first serve
+
+        shortest seek first: starvation can happen if close disk block requests keep coming in
+
+        elevator algorithm: just make sweeps in a single direction and reverse. worst case is 2 sweeps,
+        do better by sweeping right, then starting from left again
+
+    \item bad sector
+
+        spare sector swapping, internal tables for mapping, breaks contiguous read/write
+
+        shift all sector numbers so still contiguous
+
+    \item seek error: need to recalibrate mechanical movements
+\end{enumerate}
+
+stable storage
+\begin{enumerate}
+    \item disk block: preamble (disk block number) + data + ecc
+    \item ecc is some polynommial code???
+
+    \item 2 identical disks:
+
+        stable write: write 1, reread 1, write 2, reread 2
+
+        stable read: read 1, check ecc. if wrong, try disk 2
+
+        crash recovery: overwrite other one with correct ecc. both correct but different, then take newer
+\end{enumerate}
+
+Redundant Array of (Inexpensive / Independent) Disks (RAID)
+\begin{enumerate}
+    \item level 0: stripping = distribute data over multiple drives.
+
+        write file parts to multiple disks instead of 1 disk.
+        
+        write faster, but more frequently crashes
+
+    \item level 1: 2 duplicate raid level 0s
+
+        read: 2x more efficient b/c have 2x the disks to read from
+
+        write: same time b/c write to each at the same time
+
+        more reliable b/c backup
+
+    \item level 2:
+
+        39 disks: 32 bits + 6 parity + 1 word partiy
+
+        way more disks: faster read
+
+        rotation sync overhead
+
+    \item level 3: 1 parity disk.
+
+        problem: can only detect 1 bit error
+
+        1 bit error correction for disk crash
+
+        1 bit error detection for random error
+
+    \item level 4: strip level parity
+
+    \item level 5: distribute parity across drives
+
+    \item bit and strip distribution: split disk up into bits and strips, assign to disks
+
+    \item binomial failture: n disks, recover from 1 disk failure, p fail = $\binom{n}{2} p^2 (1-p)^{n-2}$
 \end{enumerate}
 
 \end{document}

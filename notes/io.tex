@@ -163,7 +163,7 @@ stable storage
 \end{enumerate}
 
 Redundant Array of (Inexpensive / Independent) Disks (RAID)
-\begin{enumerate}
+\begin{itemize}
     \item level 0: stripping = distribute data over multiple drives.
 
         write file parts to multiple disks instead of 1 disk.
@@ -200,7 +200,74 @@ Redundant Array of (Inexpensive / Independent) Disks (RAID)
 
     \item bit and strip distribution: split disk up into bits and strips, assign to disks
 
-    \item binomial failture: n disks, recover from 1 disk failure, p fail = $\binom{n}{2} p^2 (1-p)^{n-2}$
-\end{enumerate}
+    \item binomial failture: n disks, recover from 1 disk failure
+
+        $X \sim \text{Binom}(n, p)$
+
+        $P(\text{fail}) = P(X \ge 2) = 1 - P(X = 0) - P(X = 1) = 1 - (1-p)^n - \binom{n}{1} p^1 (1-p)^{n-1}$
+\end{itemize}
+
+Clock
+\begin{itemize}
+    \item crysal oscillator generates pulse
+    \item one shot mode: holding register loads counter, counter is decremented each pulse, interrupt when counter = 0
+    \item square wave mode: repeatedly copy register to counter, decrement, interrupt
+
+        periodic interrupts = clock ticks
+
+    \item interrupt launches clock driver:
+
+        maintain day time
+
+        preventing procs from running too long: scheduler initializes counter w/ process CPU quantum in ticks
+
+        accounting CPU usage: only track CPU time used by proc, start new timer on proc start.
+            increment counter for the current process
+
+    \item alarm sys call
+
+        ex: ack must be received in certain time. if lost, then must resend packet
+
+        duplicate packets b/c server thought lost: TCP has sequence number
+
+        option 1: table with alarm times, driver checks periodically, raises alarm if curr time > alarm.
+            can make you late
+
+        option 2: linked list of ticks to next alarm, periodically check, raise alarm
+
+    \item watchdog: self-monitor parts of system so no hang (common in embedded)
+
+        timer periodically sets 1, system periodically clears, if not cleared then reset system
+\end{itemize}
+
+soft timers
+\begin{itemize}
+    \item polling: busy waiting
+
+        interrupt: no waiting but overhead from context switch
+
+    \item whenever interrupted by OS (syscall, TLB, page fault): check timer + do routine
+
+    \item saves on interrupts, just piggybacks off of OS interrupt
+
+    \item secondary backup low-freq timer for low-syscall periods
+\end{itemize}
+
+power management
+\begin{itemize}
+    \item most power intensive: display
+
+        OS automatically rearranges windows to activate minimum zones
+
+        not used
+
+    \item Dynamic Voltage Scaling (DVS)
+
+        run processor at lower voltage and lower speeds during off-peak times
+
+        speed / 2 = voltage / 2 = power / 4
+\end{itemize}
+
+path: user process, apis, device drivers, hardware (and interrupt on reverse)
 
 \end{document}

@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[]{xcolor}
+\usepackage{amsmath}
+\parindent=0pt
+
+\title{Security}
+\author{gordonbchen}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Secret-key cryptography}
+\begin{itemize}
+    \item monoalphabetic substitution cipher: frequency attack
+
+    \item kerchoff's principle: same algorithm, different keys
+
+    \item public key cryptography: anyone can encrypt for you, only you can decrypt
+
+    \item digital signatures: decrypt(hash), then encrypt(decrypt(hash)) = hash to check tag
+
+    \item public key infra: browser comes with certificate authority public key, can check
+\end{itemize}
+
+\section{Access Control}
+\begin{itemize}
+    \item groups with permissions
+    \item protection matrix: most are empty, inefficient
+    \item access control list: linked list of permissions
+    \item capabilty list: users have list of files and permissions
+\end{itemize}
+
+\end{document}

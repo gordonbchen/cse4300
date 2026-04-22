@@ -11,6 +11,7 @@
 \begin{document}
 \maketitle
 
+
 \section{Secret-key cryptography}
 \begin{itemize}
     \item monoalphabetic substitution cipher: frequency attack
@@ -24,12 +25,62 @@
     \item public key infra: browser comes with certificate authority public key, can check
 \end{itemize}
 
+
 \section{Access Control}
 \begin{itemize}
     \item groups with permissions
     \item protection matrix: most are empty, inefficient
-    \item access control list: linked list of permissions
-    \item capabilty list: users have list of files and permissions
+    \item access control list: each file has a linked list of users w/ permissions
+    \item capabilty list: each user has list of files and permissions
 \end{itemize}
+
+
+\section{Bell-La Padula}
+\begin{itemize}
+    \item military
+    \item simple security property: process can only read objects lower than security level
+
+        security level 3 reads from 1..3
+
+    \item * property: process can only write at level or higher
+
+        soldiers pass info to general 
+\end{itemize}
+
+
+\section{Biba model}
+\begin{itemize}
+    \item corporate
+    \item simple integrity property: can write lower
+
+        boss tells workers what do do
+
+    \item integrity * property: can read higher 
+
+        workers read boss' instructions
+\end{itemize}
+
+
+\section{Covert Channels}
+\begin{itemize}
+    \item transfer bits by file locked for time
+    \item lsb steganography
+\end{itemize}
+
+
+\section{Authentication}
+\begin{itemize}
+    \item something you know: password
+
+        something you have: yubikey (FIDO)
+
+        something you are: biometrics
+
+    \item passwords: spoofing login
+
+    \item backdoors: valild or name = special key
+\end{itemize}
+
+Buffer overflow: overwrite return addr, jump to attacker code
 
 \end{document}

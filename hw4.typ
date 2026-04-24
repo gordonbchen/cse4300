@@ -66,11 +66,11 @@ Assume that an integer is 1 Byte in size.
 + Would your answer in part (a) be different if the loop were repeated many times? Explain. 
 
   #solution[
-    Yes, `M` will be the same, but now we need to make the array long enough (`N` large enough) so that the TLB
-    gets overwritten and the entries at the end of the loop are not correct for the beginning of the array.
+    Yes, `M` will be the same, but now we need to make the array long enough (`N` large enough) so that
+    the loop tries to access more pages than the number of entries in the TLB. This way, when the loop is
+    run repeatedly, the TLB will not have the right entries for the next loop.
 
-    The TLB has 64 entries, so to fill the TLB once we need $64 times M$ ints. But then we have to overwrite
-    the TLB twice, so we need $N = 2 times 64 times M = 2 times 64 times 4096 = 524288$.
+    The TLB has 64 entries, so we need $(64 + 1) times M = 65 times 4096 = 266240$ ints.
   ]
 
 
@@ -97,18 +97,16 @@ use LRU, FIFO, and clock algorithm? Assume that you have 500 page frames allocat
   === Clock
   #set enum(numbering: "1.")
   + 512 page faults for 0...511. Then 431 is a hit, so the R-bit is set to 1.
-  + everything but 431 misses for 0...512, so 511 misses. 431 is a hit again, R-bit set to 1...
+  + everything but 431 misses for 0...511, so 511 misses. 431 is a hit again, R-bit set to 1...
 
   Total page faults = $512 + 4 times 511 = 2556$.
 
   === LRU
   This will be similar to clock.
   + 512 page faults for 0...511. Then 431 is a hit, so counter incremented.
-  + everything but 431 misses for 0...512 b/c 513 is kept (counter is higher), so 511 misses.
+  + everything but 431 misses for 0...511 b/c 431 is kept (counter is higher), so 511 misses.
 
   Total page faults = $512 + 4 times 511 = 2556 = 2556$
-
-  #todo[check LRU]
 ]
 
 
@@ -206,5 +204,16 @@ drive RAID failing in a given hour?
 Explain the Biba model for access control. 
 
 #solution[
-  #todo[]
+  The Biba model is the opposite of the Bell-LaPadula model.
+
+  In the Bell-LaPadula model, processes can read objects at lower or equal levels and write objects
+  at higher or equal levels.
+
+  In the Biba model, processes can write objects at lower or equal levels and read objects
+  at higher or equal levels.
+
+  Biba is like a manager being able to read the CEO's instructions and then telling
+  workers what to do.
+
+  Biba ensures integrity, that no lower level process can write to an upper level process.
 ]

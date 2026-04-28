@@ -14,6 +14,7 @@
 #include <vfs.h>
 #include <sfs.h>
 #include <test.h>
+#include <vm.h>
 #include "opt-synchprobs.h"
 #include "opt-sfs.h"
 #include "opt-net.h"
@@ -663,5 +664,6 @@ menu(char *args)
 		kprintf("OS/161 kernel [? for menu]: ");
 		kgets(buf, sizeof(buf));
 		menu_execute(buf, 0);
+		kprintf("Mem avail: %u k\n", ram_getavail() / 1024);
 	}
 }

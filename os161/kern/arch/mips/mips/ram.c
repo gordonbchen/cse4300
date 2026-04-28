@@ -88,3 +88,8 @@ ram_getsize(u_int32_t *lo, u_int32_t *hi)
 	*hi = lastpaddr;
 	firstpaddr = lastpaddr = 0;
 }
+
+
+paddr_t ram_getavail() {
+	return lastpaddr - firstpaddr;
+}

@@ -56,11 +56,12 @@
     + cmd_prog, common_prog, thread_fork cmd_progthread (menu.c): call thread_fork to create a new
       thread running the command
     + thread_fork (thread.c): thread_create to allocate a thread struct, allocate stack,
-      allocate space for the thread in list of sleepers and zombies and scheduler, make runnable.
+      preallocate space for the thread in list of sleepers and zombies and scheduler, make runnable.
       puts cmd_progthread function into the switchframe return address (so next switch goes to that function)
-    + cmd_progthread (main.c), runprogram (runprogram.c): read the executable program, set up the user
-      level program's virtual address space (heap and stack), load the executable from the file,
-      create a stack in the virtual address space, and run the user program
+    + cmd_progthread (main.c), runprogram (runprogram.c): open the executable file (vfs_open), set up the user
+      level program's virtual address space (as_create), load the executable from the file (load_elf),
+      create a stack in the virtual address space (as_define_stack), and run the user program
+      by going into usermode at entrypoint (md_usermode)
   ]
 
 + Please list all the relevant functions and explain the order of execution. You can draw a function
@@ -73,7 +74,9 @@
       #set enum(numbering: "1.")
       + thread_fork (thread.c) allocates cmd_progthread's stack
       + runprogram (runprogram.c) creates the user level program's virtual address space using
-        as_create (addrspace.c), and creates the user program's stack using as_define_stack (addrspace.c)
+        as_create (addrspace.c), loads the executable program using load_elf (loadelf.c) which loads the
+        executable program's segments into the user's virtual address space,
+        and creates the user program's stack using as_define_stack (addrspace.c)
     ]
 
   - What function(s) are called to free the memory when a process is terminated?
@@ -88,7 +91,7 @@
 + What is the size of a page in OS161? Where is this defined? [10+10 points]
 
   #solution[
-    The page side is 4096 bytes. it is defined in vm.h.
+    The page size is 4096 bytes. It is defined as PAGE_SIZE in vm.h.
   ]
 
 = Problem B: [50 points]

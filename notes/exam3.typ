@@ -93,12 +93,70 @@
 
 
 = Memory Management
+- problem loading programs directly into RAM: program assumes starts at 0 mem
+  - static relocation: recalculate all addrs
+  - base and limit registers: all addrs + base, must be < limit
+- fitting processes in memory
+
+== Swapping
+- bring whole process into memory
+- external fragmentation, need memory compaction
+- need room for growth
+- memory management with bitmap and linked list
+- first fit is best, next fit: start again from last hole used
+- example: holes 10, 4, 20, 18, 7, 9, 12, 15. process is 12, 10, 9.
+
+  first fit: 20, 10, 18, next fit: 20, 18, 9
+
+== Virtual Memory
+- split into pages, pages get loaded into memory
+- overlays: programmer defined wher to split programs
+- paging: TLB is cache for page table, page table in memory, tells you if page is loaded in RAM or page fault
+  to HDD
+- VA = page table idx + offset, page table converts idx -> physical page addr
+- page table
+  - caching disabled: for IO
+  - referenced + modified: for page replacement
+  - present/absent + physical page frame idx
+- TLB: cache for page table
+- Multilevel page table: page table idx 1 + page table idx 2 + offset
+  - only create level 2 page tables if used
+- inverted page table: hash(virtual page number) -> page table idx ->
+  linked list of (virtual page, page frame addr)
+  - ex: 8kb page, 256mb ram, 64gb virtual addr: how big hash table for expected chain length < 1
+    - 256mb / 8kb = 32K physical pages so any > 32K
+  - ex: 64kb program, 4k pages, p1 has 32kb text, 16,386 bytes data, 16kb stack
+    - program has 16 pages, text is 8 pages, data is 5 (round up) pages, stack is 4 pages
+    - page size is 512 bytes: works fine b/c round up doesn't hurt as bad
+
+== TODO: page replacment algorithms
+
+== Global vs local allocation policies
+- separate I and D mem
+- copy on write
+- shared libraries
+- cleaning policy
+- allocation implementation
+- backing store
+
+== Segmentation
+- multics: allows with and without paging
+- segmentation with paging
+- pentium: segmentation with or without paging
 
 = Deadlocks
 
 = File Systems
 
 = IO
+- memory mapped IO: part of memory reserved for IO
+- DMA controller: reduce interrupts
+  - P1 wants to read IO, OS tells DMA controller to copy to RAM (or else raise an interrupt for every
+    block to copy to RAM). DMA tells disk controller to load HDD block to buffer, DMA controller handles
+    disk controller mamagement
+- interrupts handling
+- soft timers: clear timer and check interrupt when you go to kernel mode (piggy back)
+  - avoid extra interrupt overhead
 
 = Distributed Systems
 == Logical clocks
